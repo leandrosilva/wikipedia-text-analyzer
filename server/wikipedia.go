@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -64,16 +63,6 @@ func downloadWikipediaArticle(targetURL string, articleKey string) (string, erro
 	return filePath, nil
 }
 
-func readWikipediaRawArticle(articleKey string) ([]byte, error) {
-	filePath := getWikipediaArticlePath(articleKey)
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return content, nil
-}
-
 func getWikipediaArticlePath(articleKey string) string {
-	return "data/" + articleKey + ".raw"
+	return getArticlePath(articleKey, "raw")
 }

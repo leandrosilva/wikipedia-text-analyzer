@@ -20,22 +20,22 @@ func handleRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(path) > 1 && path[1] == "raw" {
-		handleReadOfRaw(w, r, articleKey)
+	if len(path) > 1 {
+		handleReadState(w, r, articleKey, path[1])
 		return
 	}
 
-	handleReadOfDone(w, r, articleKey)
+	handleReadStateDone(w, r, articleKey)
 }
 
-func handleReadOfDone(w http.ResponseWriter, r *http.Request, articleKey string) {
+func handleReadStateDone(w http.ResponseWriter, r *http.Request, articleKey string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("done-"))
 	w.Write([]byte(articleKey))
 }
 
-func handleReadOfRaw(w http.ResponseWriter, r *http.Request, articleKey string) {
-	content, err := readWikipediaRawArticle(articleKey)
+func handleReadState(w http.ResponseWriter, r *http.Request, articleKey string, state string) {
+	content, err := readArticleContent(articleKey, state)
 	if err != nil {
 		msg, statusCode := getError(articleKey, err)
 		http.Error(w, msg, statusCode)
