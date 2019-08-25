@@ -1,23 +1,12 @@
 package main
 
 import (
-	"crypto/sha1"
-	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/gocolly/colly"
 )
-
-func getWikipediaArticleKey(targetURL string) string {
-	hasher := sha1.New()
-	hasher.Write([]byte(targetURL))
-	hashed := hasher.Sum(nil)
-	articleKey := fmt.Sprintf("%x", hashed)
-
-	return articleKey
-}
 
 func downloadWikipediaArticle(targetURL string, articleKey string) (string, error) {
 	log.Println("Downloading article:", targetURL)

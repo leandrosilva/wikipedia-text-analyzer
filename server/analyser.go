@@ -38,7 +38,7 @@ func issueAnalysis(input AnalyseInput) error {
 func analyse(input AnalyseInput) (AnalyseOutput, error) {
 	log.Println("Starting analysis:", input.TargetURL)
 
-	articleKey := getWikipediaArticleKey(input.TargetURL)
+	articleKey := getArticleKey(input.TargetURL)
 	filePath, err := downloadWikipediaArticle(input.TargetURL, articleKey)
 	if err != nil {
 		return AnalyseOutput{}, err
