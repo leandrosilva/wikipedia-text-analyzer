@@ -1,1 +1,1 @@
-curl -i -XPOST http://localhost:9090/issue?url=https://en.wikipedia.org/wiki/Human_nutrition
+curl -i -XPOST "http://localhost:9090/issue?url=https://en.wikipedia.org/wiki/Human_nutrition&sentences=3"

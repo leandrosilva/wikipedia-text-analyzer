@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -20,13 +21,22 @@ var (
 
 // IssueRequest contains the URL to be analysed
 type IssueRequest struct {
-	URL string `json:"url"`
+	URL       string `json:"url"`
+	Sentences int    `json:"sentences"`
 }
 
 // IssueResponse is the immediate response confirming the issuing request
 type IssueResponse struct {
 	Status    string `json:"status"`
 	TargetURL string `json:"targetURL"`
+}
+
+// AnalyseRequest is the payload we send to issue a text analysis on the server
+type AnalyseRequest struct {
+	Client    string `json:"client"`
+	TargetURL string `json:"targetURL"`
+	HookURL   string `json:"hookURL"`
+	Sentences int    `json:"sentences"`
 }
 
 func handleIssue(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +51,7 @@ func handleIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := issue(req.URL)
+	res, err := issue(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,7 +74,17 @@ func getIssueRequest(r *http.Request) (IssueRequest, error) {
 	if !found {
 		return request, fmt.Errorf("Missing 'url' param in query string")
 	}
+
 	request.URL = url
+	request.Sentences = 1
+
+	ssent, found := getQueryParam(r, "sentences")
+	if found {
+		isent, err := strconv.Atoi(ssent)
+		if err == nil {
+			request.Sentences = isent
+		}
+	}
 
 	return request, nil
 }
@@ -78,14 +98,14 @@ func getQueryParam(r *http.Request, key string) (string, bool) {
 	return "", false
 }
 
-func issue(url string) (IssueResponse, error) {
+func issue(request IssueRequest) (IssueResponse, error) {
 	var response IssueResponse
 
-	req, err := json.Marshal(map[string]string{
-		"client":    "oetacli",
-		"targetURL": url,
-		"hookURL":   DoneHookURL,
-		"sentences": "3"})
+	req, err := json.Marshal(AnalyseRequest{
+		Client:    "mehcli",
+		TargetURL: request.URL,
+		HookURL:   DoneHookURL,
+		Sentences: request.Sentences})
 	if err != nil {
 		return response, err
 	}
