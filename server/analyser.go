@@ -2,48 +2,72 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
-type analyseInput struct {
-	Client string
-	URL    string
-	Hook   string
+// AnalyseInput is the payload to issue a text analysis
+type AnalyseInput struct {
+	Client    string
+	TargetURL string
+	HookURL   string
 }
 
-type analyseOutput struct {
-	Topics  []string
-	Summary []string
+// AnalyseOutput is the final response of a performed text analysis
+type AnalyseOutput struct {
+	TargetURL string
+	ResultURL string
+	Topics    []string
+	Summary   []string
 }
 
-type doneHookResponse struct {
+// DoneHookResponse is what clients respond when we pull their hook (ouch!)
+type DoneHookResponse struct {
+	Acknowledge bool `json:"acknowledge"`
 }
 
-func issueAnalysis(input analyseInput) (bool, error) {
-	go pullHook(input.Hook)
+func issueAnalysis(input AnalyseInput) error {
+	log.Println("Issuing analysis:", input.TargetURL)
+	go analyse(input)
 
-	return true, nil
+	return nil
 }
 
-func analyse(input analyseInput) (analyseOutput, error) {
-	return analyseOutput{}, nil
+func analyse(input AnalyseInput) (AnalyseOutput, error) {
+	log.Println("Starting analysis:", input.TargetURL)
+	time.Sleep(10 * time.Second)
+	log.Println("Finished analysis:", input.TargetURL)
+
+	output := AnalyseOutput{
+		TargetURL: input.TargetURL,
+		ResultURL: getResultURL(input.TargetURL)}
+
+	res, err := pullHook(input.HookURL, output)
+	if err != nil {
+		return output, err
+	}
+	log.Println("Hook response:", input.HookURL, "=>", res)
+
+	return output, nil
 }
 
-func pullHook(url string) (doneHookResponse, error) {
-	log.Println("<hook>", url)
-	var response doneHookResponse
+func pullHook(hookURL string, output AnalyseOutput) (DoneHookResponse, error) {
+	log.Println("Pulling hook:", hookURL)
+	var response DoneHookResponse
 
 	req, err := json.Marshal(map[string]string{
-		"client": "oetacli",
-		"blah":   "yes"})
+		"targetURL": output.TargetURL,
+		"resultURL": output.ResultURL})
 	if err != nil {
 		return response, err
 	}
 
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(req))
+	res, err := http.Post(hookURL, "application/json", bytes.NewBuffer(req))
 	if err != nil {
 		return response, err
 	}
@@ -60,4 +84,14 @@ func pullHook(url string) (doneHookResponse, error) {
 	}
 
 	return response, nil
+}
+
+func getResultURL(targetURL string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(targetURL))
+	hashed := hasher.Sum(nil)
+	key := fmt.Sprintf("%x", hashed)
+	url := getReadURL() + "/" + key
+
+	return url
 }

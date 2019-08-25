@@ -6,15 +6,17 @@ import (
 	"net/http"
 )
 
-type analyseRequest struct {
-	Client string `json:"client"`
-	URL    string `json:"url"`
-	Hook   string `json:"hook"`
+// AnalyseRequest is the payload clients send to issue a text analysis
+type AnalyseRequest struct {
+	Client    string `json:"client"`
+	TargetURL string `json:"targetURL"`
+	HookURL   string `json:"hookURL"`
 }
 
-type analyseResponse struct {
-	Status string `json:"status"`
-	URL    string `json:"url"`
+// AnalyseResponse is the immediate response we give to clients issuing analysis
+type AnalyseResponse struct {
+	Status    string `json:"status"`
+	TargetURL string `json:"targetURL"`
 }
 
 func handleAnalyse(w http.ResponseWriter, r *http.Request) {
@@ -29,18 +31,18 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	success, err := issueAnalysis(analyseInput{
-		Client: req.Client,
-		URL:    req.URL,
-		Hook:   req.Hook})
-	if !success || err != nil {
+	err = issueAnalysis(AnalyseInput{
+		Client:    req.Client,
+		TargetURL: req.TargetURL,
+		HookURL:   req.HookURL})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response, err := json.Marshal(analyseResponse{
-		Status: "issued",
-		URL:    req.URL})
+	response, err := json.Marshal(AnalyseResponse{
+		Status:    "issued",
+		TargetURL: req.TargetURL})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,8 +52,8 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func getRequest(r *http.Request) (analyseRequest, error) {
-	var request analyseRequest
+func getRequest(r *http.Request) (AnalyseRequest, error) {
+	var request AnalyseRequest
 
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()

@@ -7,12 +7,15 @@ import (
 	"net/http"
 )
 
-type doneRequest struct {
-	URL string `json:"url"`
+// DoneRequest is the payload received from analyser saying it's done
+type DoneRequest struct {
+	TargetURL string `json:"targetURL"`
+	ResultURL string `json:"resultURL"`
 }
 
-type doneResponse struct {
-	Success bool `json:"success"`
+// DoneResponse is what we say when they pull our hook
+type DoneResponse struct {
+	Acknowledge bool `json:"acknowledge"`
 }
 
 func handleDone(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +30,7 @@ func handleDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := done(req.URL)
+	res, err := done(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,9 +46,8 @@ func handleDone(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func getDoneRequest(r *http.Request) (doneRequest, error) {
-	log.Println("<hook>")
-	var request doneRequest
+func getDoneRequest(r *http.Request) (DoneRequest, error) {
+	var request DoneRequest
 
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -58,8 +60,9 @@ func getDoneRequest(r *http.Request) (doneRequest, error) {
 	return request, err
 }
 
-func done(url string) (doneResponse, error) {
-	var response doneResponse
+func done(req DoneRequest) (DoneResponse, error) {
+	log.Println("Hook was pulled:", req.TargetURL, "=>", req.ResultURL)
+	response := DoneResponse{Acknowledge: true}
 
 	return response, nil
 }

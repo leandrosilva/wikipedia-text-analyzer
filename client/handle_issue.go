@@ -13,13 +13,15 @@ import (
 var analyserURL = getAnalyserURL()
 var doneHookURL = getDoneHookURL()
 
-type issueRequest struct {
+// IssueRequest contains the URL to be analysed
+type IssueRequest struct {
 	URL string `json:"url"`
 }
 
-type issueResponse struct {
-	Status string `json:"status"`
-	URL    string `json:"url"`
+// IssueResponse is the immediate response confirming the issuing request
+type IssueResponse struct {
+	Status    string `json:"status"`
+	TargetURL string `json:"targetURL"`
 }
 
 func handleIssue(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +47,8 @@ func handleIssue(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func getIssueRequest(r *http.Request) (issueRequest, error) {
-	var request issueRequest
+func getIssueRequest(r *http.Request) (IssueRequest, error) {
+	var request IssueRequest
 
 	url, found := getQueryParam(r, "url")
 	if !found {
@@ -66,13 +68,13 @@ func getQueryParam(r *http.Request, key string) (string, bool) {
 	return "", false
 }
 
-func issue(url string) (issueResponse, error) {
-	var response issueResponse
+func issue(url string) (IssueResponse, error) {
+	var response IssueResponse
 
 	req, err := json.Marshal(map[string]string{
-		"client": "oetacli",
-		"url":    url,
-		"hook":   doneHookURL})
+		"client":    "oetacli",
+		"targetURL": url,
+		"hookURL":   doneHookURL})
 	if err != nil {
 		return response, err
 	}
