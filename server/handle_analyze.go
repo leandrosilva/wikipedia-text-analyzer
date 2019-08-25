@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// AnalyseRequest is the payload clients send to issue a text analysis
-type AnalyseRequest struct {
+// AnalyzeRequest is the payload clients send to issue a text analysis
+type AnalyzeRequest struct {
 	Client    string `json:"client"`
 	TargetURL string `json:"targetURL"`
 	HookURL   string `json:"hookURL"`
@@ -15,13 +15,13 @@ type AnalyseRequest struct {
 	Phrases   int    `json:"phrases"`
 }
 
-// AnalyseResponse is the immediate response we give to clients issuing analysis
-type AnalyseResponse struct {
+// AnalyzeResponse is the immediate response we give to clients issuing analysis
+type AnalyzeResponse struct {
 	Status    string `json:"status"`
 	TargetURL string `json:"targetURL"`
 }
 
-func handleAnalyse(w http.ResponseWriter, r *http.Request) {
+func handleAnalyze(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -33,7 +33,7 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = issueAnalysis(AnalyseInput{
+	err = issueAnalysis(AnalyzeInput{
 		Client:    req.Client,
 		TargetURL: req.TargetURL,
 		HookURL:   req.HookURL,
@@ -44,7 +44,7 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := json.Marshal(AnalyseResponse{
+	response, err := json.Marshal(AnalyzeResponse{
 		Status:    "issued",
 		TargetURL: req.TargetURL})
 	if err != nil {
@@ -56,8 +56,8 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func getRequest(r *http.Request) (AnalyseRequest, error) {
-	var request AnalyseRequest
+func getRequest(r *http.Request) (AnalyzeRequest, error) {
+	var request AnalyzeRequest
 
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()

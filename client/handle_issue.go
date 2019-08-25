@@ -12,14 +12,14 @@ import (
 )
 
 var (
-	// AnalyserURL - computed getAnalyserURL()
-	AnalyserURL = getAnalyserURL()
+	// AnalyzerURL - computed getAnalyzerURL()
+	AnalyzerURL = getAnalyzerURL()
 
 	// DoneHookURL - computed getDoneHookURL()
 	DoneHookURL = getDoneHookURL()
 )
 
-// IssueRequest contains the URL to be analysed
+// IssueRequest contains the URL to be analyzed
 type IssueRequest struct {
 	URL       string `json:"url"`
 	Sentences int    `json:"sentences"`
@@ -32,8 +32,8 @@ type IssueResponse struct {
 	TargetURL string `json:"targetURL"`
 }
 
-// AnalyseRequest is the payload we send to issue a text analysis on the server
-type AnalyseRequest struct {
+// AnalyzeRequest is the payload we send to issue a text analysis on the server
+type AnalyzeRequest struct {
 	Client    string `json:"client"`
 	TargetURL string `json:"targetURL"`
 	HookURL   string `json:"hookURL"`
@@ -112,7 +112,7 @@ func getQueryParam(r *http.Request, key string) (string, bool) {
 func issue(request IssueRequest) (IssueResponse, error) {
 	var response IssueResponse
 
-	req, err := json.Marshal(AnalyseRequest{
+	req, err := json.Marshal(AnalyzeRequest{
 		Client:    "mehcli",
 		TargetURL: request.URL,
 		HookURL:   DoneHookURL,
@@ -122,7 +122,7 @@ func issue(request IssueRequest) (IssueResponse, error) {
 		return response, err
 	}
 
-	res, err := http.Post(AnalyserURL, "application/json", bytes.NewBuffer(req))
+	res, err := http.Post(AnalyzerURL, "application/json", bytes.NewBuffer(req))
 	if err != nil {
 		return response, err
 	}
@@ -145,12 +145,12 @@ func issue(request IssueRequest) (IssueResponse, error) {
 	return response, nil
 }
 
-func getAnalyserURL() string {
+func getAnalyzerURL() string {
 	host, found := os.LookupEnv("SERVER_URL")
 	if !found {
 		host = "http://localhost:8080"
 	}
-	return host + "/analyse"
+	return host + "/analyze"
 }
 
 func getDoneHookURL() string {

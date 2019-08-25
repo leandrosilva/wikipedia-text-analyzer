@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// DoneRequest is the payload received from analyser saying it's done
+// DoneRequest is the payload received from analyzer saying it's done
 type DoneRequest struct {
 	TargetURL string `json:"targetURL"`
 	ResultURL string `json:"resultURL"`

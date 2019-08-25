@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// AnalyseInput is the payload to issue a text analysis
-type AnalyseInput struct {
+// AnalyzeInput is the payload to issue a text analysis
+type AnalyzeInput struct {
 	Client    string
 	TargetURL string
 	HookURL   string
@@ -17,8 +17,8 @@ type AnalyseInput struct {
 	Phrases   int
 }
 
-// AnalyseOutput is the final response of a performed text analysis
-type AnalyseOutput struct {
+// AnalyzeOutput is the final response of a performed text analysis
+type AnalyzeOutput struct {
 	TargetURL string
 	ResultURL string
 	Topics    []string
@@ -30,44 +30,44 @@ type DoneHookResponse struct {
 	Acknowledge bool `json:"acknowledge"`
 }
 
-func issueAnalysis(input AnalyseInput) error {
+func issueAnalysis(input AnalyzeInput) error {
 	log.Println("Issuing analysis:", input.TargetURL)
-	go analyse(input)
+	go analyze(input)
 
 	return nil
 }
 
-func analyse(input AnalyseInput) (AnalyseOutput, error) {
+func analyze(input AnalyzeInput) (AnalyzeOutput, error) {
 	log.Println("Starting analysis:", input.TargetURL)
 
 	// Get data
 	articleKey := getArticleKey(input.TargetURL)
 	rawFilePath, err := downloadWikipediaArticle(input.TargetURL, articleKey)
 	if err != nil {
-		return AnalyseOutput{}, err
+		return AnalyzeOutput{}, err
 	}
 
 	// Summarize it
 	_, err = summarizeArticle(articleKey, rawFilePath, input.Sentences)
 	if err != nil {
-		return AnalyseOutput{}, err
+		return AnalyzeOutput{}, err
 	}
 
 	// Rank k phrases
 	_, err = rankArticlePhrases(articleKey, rawFilePath, input.Phrases)
 	if err != nil {
-		return AnalyseOutput{}, err
+		return AnalyzeOutput{}, err
 	}
 
 	// Clean text
 	_, err = cleanArticle(articleKey, rawFilePath)
 	if err != nil {
-		return AnalyseOutput{}, err
+		return AnalyzeOutput{}, err
 	}
 
 	log.Println("Finished analysis:", input.TargetURL)
 
-	output := AnalyseOutput{
+	output := AnalyzeOutput{
 		TargetURL: input.TargetURL,
 		ResultURL: getResultURL(articleKey)}
 
@@ -80,7 +80,7 @@ func analyse(input AnalyseInput) (AnalyseOutput, error) {
 	return output, nil
 }
 
-func pullHook(hookURL string, output AnalyseOutput) (DoneHookResponse, error) {
+func pullHook(hookURL string, output AnalyzeOutput) (DoneHookResponse, error) {
 	log.Println("Pulling hook:", hookURL)
 	var response DoneHookResponse
 

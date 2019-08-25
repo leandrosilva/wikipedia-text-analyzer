@@ -54,7 +54,7 @@ func getURL() string {
 }
 
 func main() {
-	http.HandleFunc("/analyse", handleAnalyse)
+	http.HandleFunc("/analyze", handleAnalyze)
 	http.HandleFunc("/read/", handleRead)
 
 	log.Println("Starting server at :" + server.Port)
