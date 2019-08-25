@@ -19,8 +19,9 @@ type RankPhrase struct {
 
 // RankPhraseResult is the final product of this phrase analysis
 type RankPhraseResult struct {
-	K                     int          `json:"k"`
-	KMostImportantPhrases []RankPhrase `json:"kMostImportantPhrases"`
+	K                       int          `json:"k"`
+	KMostImportantPhrases   []RankPhrase `json:"kMostImportantPhrases"`
+	KMostImportantSentences []string     `json:"kMostImportantSentences"`
 }
 
 func rankArticlePhrases(articleKey string, rawFilePath string, k int) (string, error) {
@@ -40,20 +41,10 @@ func rankArticlePhrases(articleKey string, rawFilePath string, k int) (string, e
 	tr.Populate(rawText, language, rule)
 	tr.Ranking(algorithmDef)
 
-	rankedPhrases := textrank.FindPhrases(tr)
-	result := RankPhraseResult{K: k}
-
-	for i := range rankedPhrases {
-		if i == k {
-			break
-		}
-		result.KMostImportantPhrases = append(result.KMostImportantPhrases, RankPhrase{
-			LeftText:   rankedPhrases[i].Left,
-			RightText:  rankedPhrases[i].Right,
-			Occurrence: rankedPhrases[i].Qty,
-			Weight:     rankedPhrases[i].Weight})
-	}
-
+	result := RankPhraseResult{
+		K: k,
+		KMostImportantPhrases:   getKMostImportantPhrases(tr, k),
+		KMostImportantSentences: getKMostImportantSentences(tr, k)}
 	res, err := json.Marshal(result)
 	if err != nil {
 		return "", err
@@ -72,6 +63,40 @@ func rankArticlePhrases(articleKey string, rawFilePath string, k int) (string, e
 	log.Println("Article phrases ranked:", rankedFilePath)
 
 	return rankedFilePath, nil
+}
+
+func getKMostImportantPhrases(tr *textrank.TextRank, k int) []RankPhrase {
+	var phrases []RankPhrase
+
+	rankedPhrases := textrank.FindPhrases(tr)
+	for i := range rankedPhrases {
+		if i == k {
+			break
+		}
+		phrase := rankedPhrases[i]
+		phrases = append(phrases, RankPhrase{
+			LeftText:   phrase.Left,
+			RightText:  phrase.Right,
+			Occurrence: phrase.Qty,
+			Weight:     phrase.Weight})
+	}
+
+	return phrases
+}
+
+func getKMostImportantSentences(tr *textrank.TextRank, k int) []string {
+	var sentences []string
+
+	rankedSentences := textrank.FindSentencesByWordQtyWeight(tr, k)
+	for i := range rankedSentences {
+		if i == k {
+			break
+		}
+		sentence := rankedSentences[i]
+		sentences = append(sentences, sentence.Value)
+	}
+
+	return sentences
 }
 
 func getRankedArticlePath(articleKey string) string {
