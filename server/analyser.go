@@ -44,7 +44,12 @@ func analyse(input AnalyseInput) (AnalyseOutput, error) {
 		return AnalyseOutput{}, err
 	}
 
-	filePath, err = clearDocument(filePath)
+	filePath, err = summarizeArticle(articleKey, filePath)
+	if err != nil {
+		return AnalyseOutput{}, err
+	}
+
+	filePath, err = cleanArticle(articleKey, filePath)
 	if err != nil {
 		return AnalyseOutput{}, err
 	}

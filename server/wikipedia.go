@@ -75,5 +75,5 @@ func readWikipediaRawArticle(articleKey string) ([]byte, error) {
 }
 
 func getWikipediaArticlePath(articleKey string) string {
-	return "data/" + articleKey + ".txt"
+	return "data/" + articleKey + ".raw"
 }

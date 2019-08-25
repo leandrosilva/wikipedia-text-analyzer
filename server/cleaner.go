@@ -2,9 +2,15 @@ package main
 
 import "log"
 
-func clearDocument(filePath string) (string, error) {
+func cleanArticle(articleKey string, filePath string) (string, error) {
 	log.Println("Cleaning article:", filePath)
-	log.Println("Article cleaned:", filePath)
 
-	return "blah", nil
+	cleanedFilePath := getCleanedArticlePath(articleKey)
+	log.Println("Article cleaned:", cleanedFilePath)
+
+	return cleanedFilePath, nil
+}
+
+func getCleanedArticlePath(articleKey string) string {
+	return "data/" + articleKey + ".cleaned"
 }
