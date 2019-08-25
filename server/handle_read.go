@@ -21,27 +21,41 @@ func handleRead(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(path) > 1 && path[1] == "raw" {
-		handleReadRaw(w, r, articleKey)
+		handleReadOfRaw(w, r, articleKey)
 		return
 	}
 
-	handleReadProcessed(w, r, articleKey)
+	handleReadOfDone(w, r, articleKey)
 }
 
-func handleReadProcessed(w http.ResponseWriter, r *http.Request, articleKey string) {
+func handleReadOfDone(w http.ResponseWriter, r *http.Request, articleKey string) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("processed-"))
+	w.Write([]byte("done-"))
 	w.Write([]byte(articleKey))
 }
 
-func handleReadRaw(w http.ResponseWriter, r *http.Request, articleKey string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("raw-"))
-	w.Write([]byte(articleKey))
+func handleReadOfRaw(w http.ResponseWriter, r *http.Request, articleKey string) {
+	content, err := readWikipediaRawArticle(articleKey)
+	if err != nil {
+		msg, statusCode := getError(articleKey, err)
+		http.Error(w, msg, statusCode)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write(content)
 }
 
 func splitPath(url *url.URL) []string {
 	return strings.Split(url.Path[len("/read/"):], "/")
+}
+
+func getError(articleKey string, err error) (string, int) {
+	msg := err.Error()
+	if strings.Contains(msg, "The system cannot find the file specified") {
+		return "Key " + articleKey + " is unknown.", http.StatusNotFound
+	}
+	return msg, http.StatusInternalServerError
 }
 
 func getReadURL() string {

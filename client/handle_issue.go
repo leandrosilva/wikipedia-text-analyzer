@@ -30,6 +30,11 @@ type IssueResponse struct {
 }
 
 func handleIssue(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	req, err := getIssueRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

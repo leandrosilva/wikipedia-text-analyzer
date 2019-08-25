@@ -1,0 +1,1 @@
+curl -i http://localhost:8080/read/a2507112df1007f2c7aa7ac78f8c20c0e5467549/raw

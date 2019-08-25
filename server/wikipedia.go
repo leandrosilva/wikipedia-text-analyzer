@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -14,13 +15,13 @@ func getWikipediaArticleKey(targetURL string) string {
 	hasher := sha1.New()
 	hasher.Write([]byte(targetURL))
 	hashed := hasher.Sum(nil)
-	key := fmt.Sprintf("%x", hashed)
+	articleKey := fmt.Sprintf("%x", hashed)
 
-	return key
+	return articleKey
 }
 
-func downloadWikipediaArticle(targetURL string, key string) (string, error) {
-	filePath := "data/" + key + ".txt"
+func downloadWikipediaArticle(targetURL string, articleKey string) (string, error) {
+	filePath := getWikipediaArticlePath(articleKey)
 	file, err := os.Create(filePath)
 	if err != nil {
 		log.Println("Failed creating file:", filePath, "=>", err.Error())
@@ -50,7 +51,7 @@ func downloadWikipediaArticle(targetURL string, key string) (string, error) {
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting page:", r.URL.String())
-		file.WriteString("Source: " + targetURL + "\n")
+		file.WriteString("[Source=" + targetURL + "]\n")
 	})
 
 	c.Visit(targetURL)
@@ -59,4 +60,18 @@ func downloadWikipediaArticle(targetURL string, key string) (string, error) {
 	file.Sync()
 
 	return filePath, nil
+}
+
+func readWikipediaRawArticle(articleKey string) ([]byte, error) {
+	filePath := getWikipediaArticlePath(articleKey)
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return content, nil
+}
+
+func getWikipediaArticlePath(articleKey string) string {
+	return "data/" + articleKey + ".txt"
 }
