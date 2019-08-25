@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 )
 
 // AnalyseInput is the payload to issue a text analysis
@@ -40,9 +39,16 @@ func analyse(input AnalyseInput) (AnalyseOutput, error) {
 	log.Println("Starting analysis:", input.TargetURL)
 
 	articleKey := getWikipediaArticleKey(input.TargetURL)
-	downloadWikipediaArticle(input.TargetURL, articleKey)
+	filePath, err := downloadWikipediaArticle(input.TargetURL, articleKey)
+	if err != nil {
+		return AnalyseOutput{}, err
+	}
 
-	time.Sleep(10 * time.Second)
+	filePath, err = clearDocument(filePath)
+	if err != nil {
+		return AnalyseOutput{}, err
+	}
+
 	log.Println("Finished analysis:", input.TargetURL)
 
 	output := AnalyseOutput{

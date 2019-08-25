@@ -21,6 +21,8 @@ func getWikipediaArticleKey(targetURL string) string {
 }
 
 func downloadWikipediaArticle(targetURL string, articleKey string) (string, error) {
+	log.Println("Downloading article:", targetURL)
+
 	filePath := getWikipediaArticlePath(articleKey)
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -41,23 +43,23 @@ func downloadWikipediaArticle(targetURL string, articleKey string) (string, erro
 		Delay:       2 * time.Second,
 	})
 
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		// nothing here for now, maybe later on
+	c.OnRequest(func(r *colly.Request) {
+		file.WriteString("[Source=" + targetURL + "]\n")
 	})
 
 	c.OnHTML("p", func(e *colly.HTMLElement) {
 		file.WriteString(e.Text)
 	})
 
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting page:", r.URL.String())
-		file.WriteString("[Source=" + targetURL + "]\n")
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		// nothing here for now, maybe later on
 	})
 
 	c.Visit(targetURL)
 	c.Wait()
 
 	file.Sync()
+	log.Println("Article downloaded:", targetURL, "=>", filePath)
 
 	return filePath, nil
 }
