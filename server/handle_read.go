@@ -4,7 +4,10 @@ import (
 	"net/http"
 )
 
-var readURL = getReadURL()
+var (
+	// ReadURL - computed getReadURL()
+	ReadURL = getReadURL()
+)
 
 func handleRead(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Path[len("/read/"):]

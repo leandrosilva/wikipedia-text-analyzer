@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -40,12 +38,16 @@ func issueAnalysis(input AnalyseInput) error {
 
 func analyse(input AnalyseInput) (AnalyseOutput, error) {
 	log.Println("Starting analysis:", input.TargetURL)
+
+	articleKey := getWikipediaArticleKey(input.TargetURL)
+	downloadWikipediaArticle(input.TargetURL, articleKey)
+
 	time.Sleep(10 * time.Second)
 	log.Println("Finished analysis:", input.TargetURL)
 
 	output := AnalyseOutput{
 		TargetURL: input.TargetURL,
-		ResultURL: getResultURL(input.TargetURL)}
+		ResultURL: getResultURL(articleKey)}
 
 	res, err := pullHook(input.HookURL, output)
 	if err != nil {
@@ -86,12 +88,6 @@ func pullHook(hookURL string, output AnalyseOutput) (DoneHookResponse, error) {
 	return response, nil
 }
 
-func getResultURL(targetURL string) string {
-	hasher := sha1.New()
-	hasher.Write([]byte(targetURL))
-	hashed := hasher.Sum(nil)
-	key := fmt.Sprintf("%x", hashed)
-	url := getReadURL() + "/" + key
-
-	return url
+func getResultURL(articleKey string) string {
+	return ReadURL + "/" + articleKey
 }

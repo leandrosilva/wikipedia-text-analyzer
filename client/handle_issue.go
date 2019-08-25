@@ -10,8 +10,13 @@ import (
 	"strings"
 )
 
-var analyserURL = getAnalyserURL()
-var doneHookURL = getDoneHookURL()
+var (
+	// AnalyserURL - computed getAnalyserURL()
+	AnalyserURL = getAnalyserURL()
+
+	// DoneHookURL - computed getDoneHookURL()
+	DoneHookURL = getDoneHookURL()
+)
 
 // IssueRequest contains the URL to be analysed
 type IssueRequest struct {
@@ -74,12 +79,12 @@ func issue(url string) (IssueResponse, error) {
 	req, err := json.Marshal(map[string]string{
 		"client":    "oetacli",
 		"targetURL": url,
-		"hookURL":   doneHookURL})
+		"hookURL":   DoneHookURL})
 	if err != nil {
 		return response, err
 	}
 
-	res, err := http.Post(analyserURL, "application/json", bytes.NewBuffer(req))
+	res, err := http.Post(AnalyserURL, "application/json", bytes.NewBuffer(req))
 	if err != nil {
 		return response, err
 	}
