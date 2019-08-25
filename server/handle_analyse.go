@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // AnalyseRequest is the payload clients send to issue a text analysis
@@ -11,6 +12,7 @@ type AnalyseRequest struct {
 	Client    string `json:"client"`
 	TargetURL string `json:"targetURL"`
 	HookURL   string `json:"hookURL"`
+	Sentences string `json:"sentences"`
 }
 
 // AnalyseResponse is the immediate response we give to clients issuing analysis
@@ -34,7 +36,8 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 	err = issueAnalysis(AnalyseInput{
 		Client:    req.Client,
 		TargetURL: req.TargetURL,
-		HookURL:   req.HookURL})
+		HookURL:   req.HookURL,
+		Sentences: getSentences(req.Sentences)})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,4 +67,12 @@ func getRequest(r *http.Request) (AnalyseRequest, error) {
 	err = json.Unmarshal(body, &request)
 
 	return request, err
+}
+
+func getSentences(s string) int {
+	sentences, err := strconv.Atoi(s)
+	if err != nil {
+		return 1
+	}
+	return sentences
 }

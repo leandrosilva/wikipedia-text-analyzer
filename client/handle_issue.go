@@ -84,7 +84,8 @@ func issue(url string) (IssueResponse, error) {
 	req, err := json.Marshal(map[string]string{
 		"client":    "oetacli",
 		"targetURL": url,
-		"hookURL":   DoneHookURL})
+		"hookURL":   DoneHookURL,
+		"sentences": "3"})
 	if err != nil {
 		return response, err
 	}
@@ -98,6 +99,10 @@ func issue(url string) (IssueResponse, error) {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return response, err
+	}
+
+	if res.StatusCode != 200 {
+		return response, fmt.Errorf("Failed to issue article analysis due to server error - %s", body)
 	}
 
 	err = json.Unmarshal(body, &response)

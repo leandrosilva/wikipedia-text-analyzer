@@ -1,11 +1,38 @@
 package main
 
-import "log"
+import (
+	"io/ioutil"
+	"log"
+	"os"
 
-func summarizeArticle(articleKey string, rawFilePath string) (string, error) {
+	"github.com/JesusIslam/tldr"
+)
+
+func summarizeArticle(articleKey string, rawFilePath string, sentences int) (string, error) {
 	log.Println("Summarizing article:", rawFilePath)
 
+	contentBytes, err := ioutil.ReadFile(rawFilePath)
+	if err != nil {
+		return "", err
+	}
+
+	text := string(contentBytes)
+	bag := tldr.New()
+	summary, _ := bag.Summarize(text, sentences)
+
 	summarizedFilePath := getSummarizedArticlePath(articleKey)
+	file, err := os.Create(summarizedFilePath)
+	if err != nil {
+		log.Println("Failed creating file:", summarizedFilePath, "=>", err.Error())
+		return "", err
+	}
+	defer file.Close()
+
+	for i := range summary {
+		file.WriteString(summary[i] + "\n\n")
+	}
+
+	file.Sync()
 	log.Println("Article summarized:", summarizedFilePath)
 
 	return summarizedFilePath, nil

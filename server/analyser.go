@@ -13,6 +13,7 @@ type AnalyseInput struct {
 	Client    string
 	TargetURL string
 	HookURL   string
+	Sentences int
 }
 
 // AnalyseOutput is the final response of a performed text analysis
@@ -44,7 +45,7 @@ func analyse(input AnalyseInput) (AnalyseOutput, error) {
 		return AnalyseOutput{}, err
 	}
 
-	filePath, err = summarizeArticle(articleKey, filePath)
+	filePath, err = summarizeArticle(articleKey, filePath, input.Sentences)
 	if err != nil {
 		return AnalyseOutput{}, err
 	}
