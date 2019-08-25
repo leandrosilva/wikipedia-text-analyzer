@@ -42,7 +42,13 @@ func handleReadState(w http.ResponseWriter, r *http.Request, articleKey string, 
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
+	switch state {
+	case "raw", "summarized":
+		w.Header().Set("Content-Type", "text/plain")
+	case "ranked":
+		w.Header().Set("Content-Type", "application/json")
+	}
+
 	w.Write(content)
 }
 
