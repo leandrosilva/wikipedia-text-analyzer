@@ -23,6 +23,7 @@ var (
 type IssueRequest struct {
 	URL       string `json:"url"`
 	Sentences int    `json:"sentences"`
+	Phrases   int    `json:"phrases"`
 }
 
 // IssueResponse is the immediate response confirming the issuing request
@@ -37,6 +38,7 @@ type AnalyseRequest struct {
 	TargetURL string `json:"targetURL"`
 	HookURL   string `json:"hookURL"`
 	Sentences int    `json:"sentences"`
+	Phrases   int    `json:"phrases"`
 }
 
 func handleIssue(w http.ResponseWriter, r *http.Request) {
@@ -77,12 +79,21 @@ func getIssueRequest(r *http.Request) (IssueRequest, error) {
 
 	request.URL = url
 	request.Sentences = 1
+	request.Phrases = 1
 
 	ssent, found := getQueryParam(r, "sentences")
 	if found {
 		isent, err := strconv.Atoi(ssent)
 		if err == nil {
 			request.Sentences = isent
+		}
+	}
+
+	sphra, found := getQueryParam(r, "phrases")
+	if found {
+		iphra, err := strconv.Atoi(sphra)
+		if err == nil {
+			request.Phrases = iphra
 		}
 	}
 
@@ -105,7 +116,8 @@ func issue(request IssueRequest) (IssueResponse, error) {
 		Client:    "mehcli",
 		TargetURL: request.URL,
 		HookURL:   DoneHookURL,
-		Sentences: request.Sentences})
+		Sentences: request.Sentences,
+		Phrases:   request.Phrases})
 	if err != nil {
 		return response, err
 	}

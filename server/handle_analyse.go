@@ -12,6 +12,7 @@ type AnalyseRequest struct {
 	TargetURL string `json:"targetURL"`
 	HookURL   string `json:"hookURL"`
 	Sentences int    `json:"sentences"`
+	Phrases   int    `json:"phrases"`
 }
 
 // AnalyseResponse is the immediate response we give to clients issuing analysis
@@ -36,7 +37,8 @@ func handleAnalyse(w http.ResponseWriter, r *http.Request) {
 		Client:    req.Client,
 		TargetURL: req.TargetURL,
 		HookURL:   req.HookURL,
-		Sentences: req.Sentences})
+		Sentences: req.Sentences,
+		Phrases:   req.Phrases})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

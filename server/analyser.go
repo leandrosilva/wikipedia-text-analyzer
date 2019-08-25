@@ -14,6 +14,7 @@ type AnalyseInput struct {
 	TargetURL string
 	HookURL   string
 	Sentences int
+	Phrases   int
 }
 
 // AnalyseOutput is the final response of a performed text analysis
@@ -39,18 +40,27 @@ func issueAnalysis(input AnalyseInput) error {
 func analyse(input AnalyseInput) (AnalyseOutput, error) {
 	log.Println("Starting analysis:", input.TargetURL)
 
+	// Get data
 	articleKey := getArticleKey(input.TargetURL)
-	filePath, err := downloadWikipediaArticle(input.TargetURL, articleKey)
+	rawFilePath, err := downloadWikipediaArticle(input.TargetURL, articleKey)
 	if err != nil {
 		return AnalyseOutput{}, err
 	}
 
-	filePath, err = summarizeArticle(articleKey, filePath, input.Sentences)
+	// Summarize it
+	_, err = summarizeArticle(articleKey, rawFilePath, input.Sentences)
 	if err != nil {
 		return AnalyseOutput{}, err
 	}
 
-	filePath, err = cleanArticle(articleKey, filePath)
+	// Rank k phrases
+	_, err = rankArticlePhrases(articleKey, rawFilePath, input.Phrases)
+	if err != nil {
+		return AnalyseOutput{}, err
+	}
+
+	// Clean text
+	_, err = cleanArticle(articleKey, rawFilePath)
 	if err != nil {
 		return AnalyseOutput{}, err
 	}

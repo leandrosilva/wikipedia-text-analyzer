@@ -8,7 +8,7 @@ import (
 	"github.com/JesusIslam/tldr"
 )
 
-func summarizeArticle(articleKey string, rawFilePath string, sentences int) (string, error) {
+func summarizeArticle(articleKey string, rawFilePath string, k int) (string, error) {
 	log.Println("Summarizing article:", rawFilePath)
 
 	contentBytes, err := ioutil.ReadFile(rawFilePath)
@@ -16,9 +16,9 @@ func summarizeArticle(articleKey string, rawFilePath string, sentences int) (str
 		return "", err
 	}
 
-	text := string(contentBytes)
+	rawText := string(contentBytes)
 	bag := tldr.New()
-	summary, _ := bag.Summarize(text, sentences)
+	summary, _ := bag.Summarize(rawText, k)
 
 	summarizedFilePath := getSummarizedArticlePath(articleKey)
 	file, err := os.Create(summarizedFilePath)
