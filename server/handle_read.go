@@ -2,8 +2,9 @@ package main
 
 import (
 	"net/http"
-	"net/url"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -12,29 +13,24 @@ var (
 )
 
 func handleRead(w http.ResponseWriter, r *http.Request) {
-	path := splitPath(r.URL)
-	articleKey := path[0]
+	vars := mux.Vars(r)
+	articleKey := vars["articleKey"]
 
 	if articleKey == "" {
 		http.Error(w, "Missing article key", http.StatusBadRequest)
 		return
 	}
 
-	if len(path) > 1 {
-		handleReadState(w, r, articleKey, path[1])
-		return
-	}
-
-	handleReadStateDone(w, r, articleKey)
-}
-
-func handleReadStateDone(w http.ResponseWriter, r *http.Request, articleKey string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("done-"))
 	w.Write([]byte(articleKey))
 }
 
-func handleReadState(w http.ResponseWriter, r *http.Request, articleKey string, state string) {
+func handleReadAtState(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	articleKey := vars["articleKey"]
+	state := vars["state"]
+
 	content, err := readArticleContent(articleKey, state)
 	if err != nil {
 		msg, statusCode := getError(articleKey, err)
@@ -50,10 +46,6 @@ func handleReadState(w http.ResponseWriter, r *http.Request, articleKey string, 
 	}
 
 	w.Write(content)
-}
-
-func splitPath(url *url.URL) []string {
-	return strings.Split(url.Path[len("/read/"):], "/")
 }
 
 func getError(articleKey string, err error) (string, int) {

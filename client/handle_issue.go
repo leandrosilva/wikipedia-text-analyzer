@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -42,11 +43,6 @@ type AnalyzeRequest struct {
 }
 
 func handleIssue(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	req, err := getIssueRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -72,7 +68,8 @@ func handleIssue(w http.ResponseWriter, r *http.Request) {
 func getIssueRequest(r *http.Request) (IssueRequest, error) {
 	var request IssueRequest
 
-	url, found := getQueryParam(r, "url")
+	vars := mux.Vars(r)
+	url, found := vars["url"]
 	if !found {
 		return request, fmt.Errorf("Missing 'url' param in query string")
 	}
@@ -81,7 +78,7 @@ func getIssueRequest(r *http.Request) (IssueRequest, error) {
 	request.Sentences = 1
 	request.Phrases = 1
 
-	ssent, found := getQueryParam(r, "sentences")
+	ssent, found := vars["sentences"]
 	if found {
 		isent, err := strconv.Atoi(ssent)
 		if err == nil {
@@ -89,7 +86,7 @@ func getIssueRequest(r *http.Request) (IssueRequest, error) {
 		}
 	}
 
-	sphra, found := getQueryParam(r, "phrases")
+	sphra, found := vars["phrases"]
 	if found {
 		iphra, err := strconv.Atoi(sphra)
 		if err == nil {
@@ -98,15 +95,6 @@ func getIssueRequest(r *http.Request) (IssueRequest, error) {
 	}
 
 	return request, nil
-}
-
-func getQueryParam(r *http.Request, key string) (string, bool) {
-	for k, vs := range r.URL.Query() {
-		if len(vs) > 0 && strings.ToLower(k) == key {
-			return vs[0], true
-		}
-	}
-	return "", false
 }
 
 func issue(request IssueRequest) (IssueResponse, error) {

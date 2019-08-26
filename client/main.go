@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 )
 
 // ServerInfo packs info about this HTTP server
@@ -54,9 +56,14 @@ func getURL() string {
 }
 
 func main() {
-	http.HandleFunc("/issue", handleIssue)
-	http.HandleFunc("/done", handleDone)
+	router := mux.NewRouter()
+	router.Path("/issue").
+		Queries("url", "{url}").
+		Queries("sentences", "{sentences}").
+		Queries("phrases", "{phrases}").
+		HandlerFunc(handleIssue).Methods("POST")
+	router.HandleFunc("/done", handleDone).Methods("POST")
 
 	log.Println("Starting server at :" + server.Port)
-	log.Fatal(http.ListenAndServe(":"+server.Port, nil))
+	log.Fatal(http.ListenAndServe(":"+server.Port, router))
 }
