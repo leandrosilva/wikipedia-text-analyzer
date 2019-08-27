@@ -5,6 +5,8 @@ import "log"
 func cleanArticle(articleKey string, filePath string) (string, error) {
 	log.Println("Cleaning article:", filePath)
 
+	// TODO
+
 	cleanedFilePath := getCleanedArticlePath(articleKey)
 	log.Println("Article cleaned:", cleanedFilePath)
 

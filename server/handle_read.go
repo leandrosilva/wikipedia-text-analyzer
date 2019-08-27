@@ -39,9 +39,9 @@ func handleReadAtState(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch state {
-	case "raw", "summarized":
+	case "raw":
 		w.Header().Set("Content-Type", "text/plain")
-	case "ranked":
+	default:
 		w.Header().Set("Content-Type", "application/json")
 	}
 

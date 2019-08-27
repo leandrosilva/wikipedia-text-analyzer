@@ -47,6 +47,12 @@ func analyze(input AnalyzeInput) (AnalyzeOutput, error) {
 		return AnalyzeOutput{}, err
 	}
 
+	// Clean text
+	_, err = cleanArticle(articleKey, rawFilePath)
+	if err != nil {
+		return AnalyzeOutput{}, err
+	}
+
 	// Summarize it
 	_, err = summarizeArticle(articleKey, rawFilePath, input.Sentences)
 	if err != nil {
@@ -55,12 +61,6 @@ func analyze(input AnalyzeInput) (AnalyzeOutput, error) {
 
 	// Rank k phrases
 	_, err = rankArticlePhrases(articleKey, rawFilePath, input.Phrases)
-	if err != nil {
-		return AnalyzeOutput{}, err
-	}
-
-	// Clean text
-	_, err = cleanArticle(articleKey, rawFilePath)
 	if err != nil {
 		return AnalyzeOutput{}, err
 	}
