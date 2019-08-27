@@ -21,9 +21,16 @@ func handleRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content, err := readArticleContent(articleKey, "done")
+	if err != nil {
+		msg, statusCode := getError(articleKey, err)
+		http.Error(w, msg, statusCode)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("done-"))
-	w.Write([]byte(articleKey))
+	w.Header().Set("Article-Key", articleKey)
+	w.Write(content)
 }
 
 func handleReadAtState(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +52,7 @@ func handleReadAtState(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 	}
 
+	w.Header().Set("Article-Key", articleKey)
 	w.Write(content)
 }
 

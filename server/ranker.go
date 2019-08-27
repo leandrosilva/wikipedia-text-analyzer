@@ -45,7 +45,7 @@ func rankArticlePhrases(articleKey string, rawFilePath string, k int) (string, e
 		K: k,
 		KMostImportantPhrases:   getKMostImportantPhrases(tr, k),
 		KMostImportantSentences: getKMostImportantSentences(tr, k)}
-	res, err := json.Marshal(result)
+	jsonResult, err := json.Marshal(result)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func rankArticlePhrases(articleKey string, rawFilePath string, k int) (string, e
 	}
 	defer file.Close()
 
-	file.Write(res)
+	file.Write(jsonResult)
 	file.Sync()
 	log.Println("Article phrases ranked:", rankedFilePath)
 

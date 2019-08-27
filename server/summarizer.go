@@ -9,8 +9,8 @@ import (
 	"github.com/JesusIslam/tldr"
 )
 
-// SummaryData is the layout in which text summarized are stored
-type SummaryData struct {
+// SummaryResult is the layout in which text summarized are stored
+type SummaryResult struct {
 	K         int      `json:"k"`
 	Sentences []string `json:"sentences"`
 }
@@ -35,17 +35,16 @@ func summarizeArticle(articleKey string, rawFilePath string, k int) (string, err
 	}
 	defer file.Close()
 
-	data := SummaryData{K: k}
+	result := SummaryResult{K: k}
 	for i := range summary {
-		data.Sentences = append(data.Sentences, summary[i])
+		result.Sentences = append(result.Sentences, summary[i])
 	}
-	jsonData, err := json.Marshal(data)
+	jsonResult, err := json.Marshal(result)
 	if err != nil {
-		log.Println("Failed serializing to file:", summarizedFilePath, "=>", err.Error())
 		return "", err
 	}
-	file.Write(jsonData)
 
+	file.Write(jsonResult)
 	file.Sync()
 	log.Println("Article summarized:", summarizedFilePath)
 

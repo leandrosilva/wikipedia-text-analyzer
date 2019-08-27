@@ -65,6 +65,12 @@ func analyze(input AnalyzeInput) (AnalyzeOutput, error) {
 		return AnalyzeOutput{}, err
 	}
 
+	// Reduce
+	_, err = reduceArticle(articleKey)
+	if err != nil {
+		return AnalyzeOutput{}, err
+	}
+
 	log.Println("Finished analysis:", input.TargetURL)
 
 	output := AnalyzeOutput{
